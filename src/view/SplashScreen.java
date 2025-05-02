@@ -11,7 +11,7 @@ public class SplashScreen {
 
         // Create a panel with vertical padding
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(-150, 0, 0, 0)); // Top, Left, Bottom, Right
+        panel.setBorder(BorderFactory.createEmptyBorder(-130, 0, 0, 0)); // Top, Left, Bottom, Right
 
         JLabel label = new JLabel(new ImageIcon("resources/splash-image.png"));
         panel.add(label, BorderLayout.NORTH);
