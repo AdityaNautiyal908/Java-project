@@ -5,7 +5,6 @@ import dao.UserDAO;
 import model.User;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -24,7 +23,6 @@ public class AdminPanel extends JFrame {
     public AdminPanel(String username) {
         this.adminUsername = username;
 
-        // Set Nimbus Look and Feel
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -44,12 +42,10 @@ public class AdminPanel extends JFrame {
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // ---------- Top Label ----------
         JLabel welcomeLabel = new JLabel("Welcome, " + adminUsername, SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         add(welcomeLabel, BorderLayout.NORTH);
 
-        // ---------- Left Sidebar with Buttons ----------
         JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
         buttonPanel.setBackground(new Color(230, 240, 250));
@@ -75,7 +71,6 @@ public class AdminPanel extends JFrame {
 
         add(buttonPanel, BorderLayout.WEST);
 
-        // ---------- Form Panel (Top Center) ----------
         JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Add New User"));
 
@@ -91,14 +86,12 @@ public class AdminPanel extends JFrame {
         formPanel.add(browseButton);
         formPanel.add(addButton);
 
-        // ---------- Center Panel holds Form + User List ----------
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         centerPanel.setBackground(new Color(245, 250, 255));
 
         centerPanel.add(formPanel, BorderLayout.NORTH);
 
-        // User List Panel
         userListPanel = new JPanel();
         userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(userListPanel);
@@ -108,7 +101,6 @@ public class AdminPanel extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // ---------- Button Actions ----------
         addUserBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Use the form above to add users."));
         markAttendanceBtn.addActionListener(e -> new AttendancePanel());
         viewHistoryBtn.addActionListener(e -> new AttendanceHistoryPanel());
@@ -125,13 +117,7 @@ public class AdminPanel extends JFrame {
             int result = fileChooser.showOpenDialog(AdminPanel.this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                if (selectedFile != null) {
-                    photoPathField.setText(selectedFile.getAbsolutePath());
-                } else {
-                    JOptionPane.showMessageDialog(AdminPanel.this, "No file selected!");
-                }
-            } else {
-                JOptionPane.showMessageDialog(AdminPanel.this, "File selection was canceled.");
+                photoPathField.setText(selectedFile.getAbsolutePath());
             }
         });
 
@@ -157,17 +143,66 @@ public class AdminPanel extends JFrame {
         });
 
         loadUsers();
-
         setVisible(true);
     }
 
     private void loadUsers() {
         userListPanel.removeAll();
         List<User> users = userDAO.getAllUsers();
+
         for (User user : users) {
-            JLabel label = new JLabel(user.getId() + ": " + user.getName() + " (" + user.getPhotoPath() + ")");
-            userListPanel.add(label);
+            JPanel userPanel = new JPanel(new BorderLayout());
+            userPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+            JLabel userInfo = new JLabel(user.getId() + ": " + user.getName() + " (" + user.getPhotoPath() + ")");
+            userPanel.add(userInfo, BorderLayout.CENTER);
+
+            JPanel buttonPanel = new JPanel(new FlowLayout());
+            JButton editBtn = new JButton("Edit");
+            JButton deleteBtn = new JButton("Delete");
+
+            editBtn.addActionListener(e -> {
+                JTextField nameField = new JTextField(user.getName());
+                JTextField photoField = new JTextField(user.getPhotoPath());
+
+                JPanel panel = new JPanel(new GridLayout(2, 2));
+                panel.add(new JLabel("Name:"));
+                panel.add(nameField);
+                panel.add(new JLabel("Photo Path:"));
+                panel.add(photoField);
+
+                int result = JOptionPane.showConfirmDialog(this, panel, "Edit User", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    user.setName(nameField.getText());
+                    user.setPhotoPath(photoField.getText());
+                    if (userDAO.updateUser(user)) {
+                        JOptionPane.showMessageDialog(this, "✅ User updated.");
+                        loadUsers();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "❌ Failed to update user.");
+                    }
+                }
+            });
+
+            deleteBtn.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this user?", "Confirm", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    if (userDAO.deleteUser(user.getId())) {
+                        JOptionPane.showMessageDialog(this, "✅ User deleted.");
+                        loadUsers();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "❌ Failed to delete user.");
+                    }
+                }
+            });
+
+            buttonPanel.add(editBtn);
+            buttonPanel.add(deleteBtn);
+            userPanel.add(buttonPanel, BorderLayout.EAST);
+
+            userListPanel.add(userPanel);
         }
+
         userListPanel.revalidate();
         userListPanel.repaint();
     }

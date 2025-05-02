@@ -1,4 +1,3 @@
-// File: view/Loading.java
 package view;
 
 import javax.swing.*;
@@ -12,7 +11,6 @@ public class Loading extends JFrame implements Runnable {
 
     public Loading(String username) {
         this.username = username;
-        th = new Thread(this);
 
         setBounds(600, 300, 600, 400);
         JPanel contentPane = new JPanel();
@@ -38,11 +36,12 @@ public class Loading extends JFrame implements Runnable {
         contentPane.add(panel);
 
         setUndecorated(true);
-        th.start();
+        // th.start(); ❌ Remove this line
     }
 
     public void setUploading() {
         setVisible(true);
+        th = new Thread(this); // ✅ Create new thread instance
         th.start();
     }
 
@@ -61,6 +60,9 @@ public class Loading extends JFrame implements Runnable {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Loading("").setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            Loading loading = new Loading("");
+            loading.setUploading(); // ✅ Start thread from here
+        });
     }
 }
