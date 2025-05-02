@@ -46,11 +46,12 @@ public class AdminPanel extends JFrame {
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         add(welcomeLabel, BorderLayout.NORTH);
 
+        // === Side Button Panel ===
         JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
         buttonPanel.setBackground(new Color(230, 240, 250));
-
         Font buttonFont = new Font("Segoe UI", Font.BOLD, 14);
+
         JButton addUserBtn = new JButton("Add New User");
         JButton markAttendanceBtn = new JButton("Mark Attendance");
         JButton viewHistoryBtn = new JButton("View Attendance History");
@@ -68,9 +69,27 @@ public class AdminPanel extends JFrame {
         buttonPanel.add(viewHistoryBtn);
         buttonPanel.add(exportBtn);
         buttonPanel.add(logoutBtn);
-
         add(buttonPanel, BorderLayout.WEST);
 
+        // === Center Panel ===
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        centerPanel.setBackground(new Color(245, 250, 255));
+
+        // === Search Panel ===
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Search Users"));
+
+        JTextField searchField = new JTextField(20);
+        JButton searchButton = new JButton("Search");
+
+        searchPanel.add(new JLabel("Search by Name/ID:"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+
+        centerPanel.add(searchPanel, BorderLayout.NORTH);
+
+        // === Add User Form ===
         JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Add New User"));
 
@@ -86,14 +105,12 @@ public class AdminPanel extends JFrame {
         formPanel.add(browseButton);
         formPanel.add(addButton);
 
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        centerPanel.setBackground(new Color(245, 250, 255));
+        centerPanel.add(formPanel, BorderLayout.SOUTH);
 
-        centerPanel.add(formPanel, BorderLayout.NORTH);
-
+        // === User List Panel ===
         userListPanel = new JPanel();
         userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
+
         JScrollPane scrollPane = new JScrollPane(userListPanel);
         scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "All Users"));
 
@@ -101,7 +118,8 @@ public class AdminPanel extends JFrame {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        addUserBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Use the form above to add users."));
+        // === Button Listeners ===
+        addUserBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Use the form below to add users."));
         markAttendanceBtn.addActionListener(e -> new AttendancePanel());
         viewHistoryBtn.addActionListener(e -> new AttendanceHistoryPanel());
 
@@ -142,6 +160,12 @@ public class AdminPanel extends JFrame {
             }
         });
 
+        searchButton.addActionListener(e -> {
+            String keyword = searchField.getText().trim();
+            List<User> filteredUsers = userDAO.searchUsers(keyword);
+            displayUsers(filteredUsers);
+        });
+
         loadUsers();
         setVisible(true);
     }
@@ -149,6 +173,28 @@ public class AdminPanel extends JFrame {
     private void loadUsers() {
         userListPanel.removeAll();
         List<User> users = userDAO.getAllUsers();
+        displayUsers(users);
+    }
+
+    private void exportAttendanceToCSV() {
+        String filePath = "attendance.csv";
+
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.append("ID,Name,Date,Status\n");
+            List<User> users = userDAO.getAllUsers();
+            for (User user : users) {
+                String attendanceStatus = "Present";
+                writer.append(user.getId() + "," + user.getName() + ",2025-05-01," + attendanceStatus + "\n");
+            }
+            JOptionPane.showMessageDialog(this, "✅ Attendance exported to " + filePath);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "❌ Failed to export attendance.");
+            e.printStackTrace();
+        }
+    }
+
+    private void displayUsers(List<User> users) {
+        userListPanel.removeAll();
 
         for (User user : users) {
             JPanel userPanel = new JPanel(new BorderLayout());
@@ -205,22 +251,5 @@ public class AdminPanel extends JFrame {
 
         userListPanel.revalidate();
         userListPanel.repaint();
-    }
-
-    private void exportAttendanceToCSV() {
-        String filePath = "attendance.csv";
-
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.append("ID,Name,Date,Status\n");
-            List<User> users = userDAO.getAllUsers();
-            for (User user : users) {
-                String attendanceStatus = "Present";
-                writer.append(user.getId() + "," + user.getName() + ",2025-05-01," + attendanceStatus + "\n");
-            }
-            JOptionPane.showMessageDialog(this, "✅ Attendance exported to " + filePath);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "❌ Failed to export attendance.");
-            e.printStackTrace();
-        }
     }
 }

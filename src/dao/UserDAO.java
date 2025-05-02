@@ -71,4 +71,27 @@ public class UserDAO {
         }
         return users;
     }
+
+    public List<User> searchUsers(String keyword) {
+        List<User> users = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            String query = "SELECT * FROM users WHERE name LIKE ? OR CAST(id AS CHAR) LIKE ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, "%" + keyword + "%");
+                stmt.setString(2, "%" + keyword + "%");
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        int id = rs.getInt("id");
+                        String name = rs.getString("name");
+                        String photoPath = rs.getString("photo_path");
+                        users.add(new User(id, name, photoPath));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
 }
