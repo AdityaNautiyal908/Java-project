@@ -92,8 +92,8 @@ public class AdminLogin extends JFrame {
         String password = new String(passwordField.getPassword());
 
         if (adminDAO.isValidAdmin(username, password)) {
-            // Show loading animation
-            Loading loading = new Loading(username);
+            // Pass `this` to Loading so it can close this window later
+            Loading loading = new Loading(username, this);
             loading.setUploading();  // Start loading animation
         } else {
             JOptionPane.showMessageDialog(this, "Invalid credentials ❌");

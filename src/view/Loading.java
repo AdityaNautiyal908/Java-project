@@ -8,13 +8,15 @@ public class Loading extends JFrame implements Runnable {
     private JProgressBar progressBar;
     private Thread th;
     private String username;
+    private AdminLogin loginFrame;
 
-    public Loading(String username) {
+    public Loading(String username, AdminLogin loginFrame) {
         this.username = username;
+        this.loginFrame = loginFrame;
 
         setBounds(600, 300, 600, 400);
         JPanel contentPane = new JPanel();
-        contentPane.setBackground(new Color(51,204, 255));
+        contentPane.setBackground(new Color(51, 204, 255));
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
@@ -36,13 +38,16 @@ public class Loading extends JFrame implements Runnable {
         contentPane.add(panel);
 
         setUndecorated(true);
-        // th.start(); ❌ Remove this line
     }
 
     public void setUploading() {
         setVisible(true);
-        th = new Thread(this); // ✅ Create new thread instance
+        th = new Thread(this);
         th.start();
+        // Don't open AdminPanel here, we'll handle it in the run method after progress is complete.
+        if (loginFrame != null) {
+            loginFrame.dispose();  // Close AdminLogin window after setting up loading
+        }
     }
 
     @Override
@@ -50,10 +55,11 @@ public class Loading extends JFrame implements Runnable {
         try {
             for (int i = 0; i < 100; i++) {
                 progressBar.setValue(i + 1);
-                Thread.sleep(50);
+                Thread.sleep(50); // Simulate loading process
             }
-            setVisible(false);
-            new AdminPanel(username).setVisible(true); // Navigate to Admin Panel after loading
+            setVisible(false); // Hide loading screen after progress is complete
+            // Open AdminPanel after loading completes
+            SwingUtilities.invokeLater(() -> new AdminPanel(username).setVisible(true));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -61,8 +67,8 @@ public class Loading extends JFrame implements Runnable {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Loading loading = new Loading("");
-            loading.setUploading(); // ✅ Start thread from here
+            Loading loading = new Loading("admin", null);  // Dummy username, no login frame
+            loading.setUploading();
         });
     }
 }
