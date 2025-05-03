@@ -16,9 +16,29 @@ public class AdminDAO {
             return rs.next();
 
         } catch (SQLException e) {
-            System.out.println("Admin login error: " + e.getMessage());
+            System.err.println("Admin login error: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean createAdmin(String username, String password) {
+        String query = "INSERT INTO admin (username, password) VALUES (?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Admin account created successfully for user: " + username);
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Admin creation error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean updatePassword(String username, String newPassword) {
@@ -29,11 +49,14 @@ public class AdminDAO {
             stmt.setString(1, newPassword);
             stmt.setString(2, username);
             int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-
+            if (rowsAffected > 0) {
+                System.out.println("Password updated successfully for user: " + username);
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Password update error: " + e.getMessage());
-            return false;
+            System.err.println("Password update error: " + e.getMessage());
+            e.printStackTrace();
         }
+        return false;
     }
 }

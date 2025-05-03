@@ -111,6 +111,15 @@ public class AdminLogin extends JFrame {
         });
         rightPanel.add(forgotPasswordButton, gbc);
 
+        // Register button
+        gbc.gridy = 7;
+        JButton registerButton = createStyledButton("Register New Admin", new Color(155, 89, 182));
+        registerButton.addActionListener(e -> {
+            AdminRegistration registration = new AdminRegistration();
+            registration.setVisible(true);
+        });
+        rightPanel.add(registerButton, gbc);
+
         // Add panels to main panel
         mainPanel.add(leftPanel, BorderLayout.WEST);
         mainPanel.add(rightPanel, BorderLayout.CENTER);

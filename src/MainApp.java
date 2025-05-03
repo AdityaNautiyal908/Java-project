@@ -4,6 +4,10 @@ import view.SplashScreen;
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.BorderLayout;
 
 public class MainApp {
     public static void main(String[] args) {
