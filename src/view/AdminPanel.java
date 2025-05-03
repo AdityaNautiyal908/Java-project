@@ -58,18 +58,21 @@ public class AdminPanel extends JFrame {
         JButton markAttendanceBtn = new JButton("Mark Attendance");
         JButton viewHistoryBtn = new JButton("View Attendance History");
         JButton exportBtn = new JButton("Export Attendance to CSV");
+        JButton paymentManagementBtn = new JButton("Payment Management");
         JButton logoutBtn = new JButton("Logout");
 
         addUserBtn.setFont(buttonFont);
         markAttendanceBtn.setFont(buttonFont);
         viewHistoryBtn.setFont(buttonFont);
         exportBtn.setFont(buttonFont);
+        paymentManagementBtn.setFont(buttonFont);
         logoutBtn.setFont(buttonFont);
 
         buttonPanel.add(addUserBtn);
         buttonPanel.add(markAttendanceBtn);
         buttonPanel.add(viewHistoryBtn);
         buttonPanel.add(exportBtn);
+        buttonPanel.add(paymentManagementBtn);
         buttonPanel.add(logoutBtn);
         add(buttonPanel, BorderLayout.WEST);
 
@@ -133,6 +136,7 @@ public class AdminPanel extends JFrame {
         addUserBtn.addActionListener(e -> JOptionPane.showMessageDialog(this, "Use the form below to add users."));
         markAttendanceBtn.addActionListener(e -> new AttendancePanel());
         viewHistoryBtn.addActionListener(e -> new AttendanceHistoryPanel());
+        paymentManagementBtn.addActionListener(e -> new PaymentManagementPanel());
 
         exportBtn.addActionListener(e -> exportAttendanceToCSV());
 

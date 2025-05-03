@@ -15,14 +15,41 @@ public class DatabaseConnection {
     // Singleton pattern to ensure only one connection instance
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            try {
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                // Set auto-commit to true
+                connection.setAutoCommit(true);
+                System.out.println("Database connection established successfully");
+            } catch (SQLException e) {
+                System.err.println("Error establishing database connection: " + e.getMessage());
+                throw e;
+            }
         }
         return connection;
     }
 
-    public static void closeConnection() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+    public static void closeConnection() {
+        if (connection != null) {
+            try {
+                if (!connection.isClosed()) {
+                    connection.close();
+                    System.out.println("Database connection closed successfully");
+                }
+            } catch (SQLException e) {
+                System.err.println("Error closing database connection: " + e.getMessage());
+            }
+        }
+    }
+
+    // Add a method to check connection status
+    public static boolean isConnectionValid() {
+        if (connection == null) {
+            return false;
+        }
+        try {
+            return !connection.isClosed() && connection.isValid(5);
+        } catch (SQLException e) {
+            return false;
         }
     }
 }
