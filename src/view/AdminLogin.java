@@ -231,6 +231,17 @@ public class AdminLogin extends JFrame {
         return button;
     }
 
+    private void showStyledMessageDialog(Component parent, String message, String title, int messageType) {
+        UIManager.put("OptionPane.background", new Color(44, 62, 80));
+        UIManager.put("Panel.background", new Color(44, 62, 80));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+        UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.BOLD, 16));
+        UIManager.put("Button.background", new Color(46, 204, 113));
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.font", new Font("Segoe UI", Font.BOLD, 14));
+        JOptionPane.showMessageDialog(parent, message, title, messageType);
+    }
+
     private void login() {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
@@ -242,7 +253,7 @@ public class AdminLogin extends JFrame {
             });
             loading.setUploading();
         } else {
-            JOptionPane.showMessageDialog(this, 
+            showStyledMessageDialog(this, 
                 "Invalid credentials ❌",
                 "Login Failed",
                 JOptionPane.ERROR_MESSAGE

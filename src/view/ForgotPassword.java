@@ -304,6 +304,17 @@ public class ForgotPassword extends JDialog {
         }
     }
 
+    private void showStyledMessageDialog(Component parent, String message, String title, int messageType) {
+        UIManager.put("OptionPane.background", new Color(44, 62, 80));
+        UIManager.put("Panel.background", new Color(44, 62, 80));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+        UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.BOLD, 16));
+        UIManager.put("Button.background", new Color(46, 204, 113));
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.font", new Font("Segoe UI", Font.BOLD, 14));
+        JOptionPane.showMessageDialog(parent, message, title, messageType);
+    }
+
     private void handleReset() {
         String username = usernameField.getText().trim();
         String newPassword = new String(newPasswordField.getPassword());
@@ -312,7 +323,7 @@ public class ForgotPassword extends JDialog {
         String recoveryAnswer = recoveryAnswerField.getText().trim();
 
         if (username.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty() || recoveryAnswer.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
+            showStyledMessageDialog(this,
                 "Please fill in all fields.",
                 "Invalid Input",
                 JOptionPane.ERROR_MESSAGE
@@ -321,7 +332,7 @@ public class ForgotPassword extends JDialog {
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(this,
+            showStyledMessageDialog(this,
                 "Passwords do not match.",
                 "Invalid Input",
                 JOptionPane.ERROR_MESSAGE
@@ -344,7 +355,7 @@ public class ForgotPassword extends JDialog {
 
         if (isValidRecovery) {
             if (adminDAO.updatePassword(username, newPassword)) {
-                JOptionPane.showMessageDialog(this,
+                showStyledMessageDialog(this,
                     "Password has been reset successfully.",
                     "Password Reset",
                     JOptionPane.INFORMATION_MESSAGE
@@ -355,14 +366,14 @@ public class ForgotPassword extends JDialog {
                     new AdminLogin();
                 }
             } else {
-                JOptionPane.showMessageDialog(this,
+                showStyledMessageDialog(this,
                     "Failed to reset password.",
                     "Reset Failed",
                     JOptionPane.ERROR_MESSAGE
                 );
             }
         } else {
-            JOptionPane.showMessageDialog(this,
+            showStyledMessageDialog(this,
                 "Invalid recovery information.",
                 "Verification Failed",
                 JOptionPane.ERROR_MESSAGE
