@@ -105,7 +105,10 @@ public class AdminLogin extends JFrame {
         // Forgot password button
         gbc.gridy = 6;
         forgotPasswordButton = createStyledButton("Forgot Password?", new Color(52, 152, 219));
-        forgotPasswordButton.addActionListener(e -> new ForgotPassword(this));
+        forgotPasswordButton.addActionListener(e -> {
+            ForgotPassword forgotPassword = new ForgotPassword(this);
+            forgotPassword.setVisible(true);
+        });
         rightPanel.add(forgotPasswordButton, gbc);
 
         // Add panels to main panel
