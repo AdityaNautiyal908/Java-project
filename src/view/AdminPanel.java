@@ -40,7 +40,7 @@ public class AdminPanel extends JFrame {
         setIconImage(icon.getImage());
 
         setTitle("Admin Panel - Logged in as " + adminUsername);
-        setSize(800, 600);
+        setSize(1950, 800);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
