@@ -18,6 +18,8 @@ public class AdminPanel extends JFrame {
     private JButton addButton;
     private JPanel userListPanel;
     private String adminUsername;
+    private JLabel imagePreviewLabel;
+    private File selectedImageFile;
     private UserDAO userDAO = new UserDAO();
 
     public AdminPanel(String username) {
@@ -86,22 +88,32 @@ public class AdminPanel extends JFrame {
         searchPanel.add(new JLabel("Search by Name/ID:"));
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
-
         centerPanel.add(searchPanel, BorderLayout.NORTH);
 
         // === Add User Form ===
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 5, 5));  // Reduced space between components
         formPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Add New User"));
 
         nameField = new JTextField();
         photoPathField = new JTextField();
         browseButton = new JButton("Browse");
         addButton = new JButton("Add User");
+        imagePreviewLabel = new JLabel();
+        imagePreviewLabel.setPreferredSize(new Dimension(100, 100));  // Smaller image preview size
+        imagePreviewLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        // Set smaller preferred sizes for input fields and buttons
+        nameField.setPreferredSize(new Dimension(120, 20));  // Smaller width and height for name input
+        photoPathField.setPreferredSize(new Dimension(120, 20));  // Smaller width and height for photo path input
+        browseButton.setPreferredSize(new Dimension(80, 20));  // Smaller size for browse button
+        addButton.setPreferredSize(new Dimension(80, 20));      // Smaller size for add button
 
         formPanel.add(new JLabel("Name:"));
         formPanel.add(nameField);
         formPanel.add(new JLabel("Photo Path:"));
         formPanel.add(photoPathField);
+        formPanel.add(new JLabel("Preview:"));
+        formPanel.add(imagePreviewLabel);
         formPanel.add(browseButton);
         formPanel.add(addButton);
 
@@ -115,7 +127,6 @@ public class AdminPanel extends JFrame {
         scrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "All Users"));
 
         centerPanel.add(scrollPane, BorderLayout.CENTER);
-
         add(centerPanel, BorderLayout.CENTER);
 
         // === Button Listeners ===
@@ -132,10 +143,15 @@ public class AdminPanel extends JFrame {
 
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            int result = fileChooser.showOpenDialog(AdminPanel.this);
+            fileChooser.setDialogTitle("Select Profile Picture");
+            int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                photoPathField.setText(selectedFile.getAbsolutePath());
+                selectedImageFile = fileChooser.getSelectedFile();
+                photoPathField.setText(selectedImageFile.getAbsolutePath());
+
+                ImageIcon imageIcon = new ImageIcon(selectedImageFile.getAbsolutePath());
+                Image img = imageIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                imagePreviewLabel.setIcon(new ImageIcon(img));
             }
         });
 
@@ -154,7 +170,8 @@ public class AdminPanel extends JFrame {
                 JOptionPane.showMessageDialog(this, "✅ User added successfully!");
                 nameField.setText("");
                 photoPathField.setText("");
-                loadUsers();
+                imagePreviewLabel.setIcon(null);  // Clear the image preview
+                loadUsers();  // Refresh the user list
             } else {
                 JOptionPane.showMessageDialog(this, "❌ Failed to add user.");
             }
@@ -207,6 +224,10 @@ public class AdminPanel extends JFrame {
             JButton editBtn = new JButton("Edit");
             JButton deleteBtn = new JButton("Delete");
 
+            // Make buttons smaller
+            editBtn.setPreferredSize(new Dimension(70, 20));
+            deleteBtn.setPreferredSize(new Dimension(70, 20));
+
             editBtn.addActionListener(e -> {
                 JTextField nameField = new JTextField(user.getName());
                 JTextField photoField = new JTextField(user.getPhotoPath());
@@ -249,7 +270,7 @@ public class AdminPanel extends JFrame {
             userListPanel.add(userPanel);
         }
 
-        userListPanel.revalidate();
-        userListPanel.repaint();
+        revalidate();
+        repaint();
     }
 }

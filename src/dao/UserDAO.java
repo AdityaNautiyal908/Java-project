@@ -1,7 +1,6 @@
 // File: dao/UserDAO.java
 package dao;
 
-import model.DatabaseConnection;
 import model.User;
 
 import java.sql.*;
@@ -13,21 +12,19 @@ import static model.DatabaseConnection.getConnection;
 public class UserDAO {
 
     public boolean addUser(User user) {
-        try (Connection conn = getConnection()) {
-            String query = "INSERT INTO users (name, photo_path) VALUES (?, ?)";
-            try (PreparedStatement ps = conn.prepareStatement(query)) {
-                ps.setString(1, user.getName());
-                ps.setString(2, user.getPhotoPath());
-                int rowsInserted = ps.executeUpdate();
-                return rowsInserted > 0;
-            }
+        String sql = "INSERT INTO users (name, photo_path) VALUES (?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getPhotoPath());
+            return stmt.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-
-    // Add to UserDAO.java
 
     public boolean updateUser(User user) {
         try (Connection conn = getConnection();
@@ -53,18 +50,20 @@ public class UserDAO {
         }
     }
 
-
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        try (Connection conn = getConnection()) {
-            String query = "SELECT * FROM users";
-            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String name = rs.getString("name");
-                    String photoPath = rs.getString("photo_path");
-                    users.add(new User(id,name, photoPath));
-                }
+        String sql = "SELECT * FROM users";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("photo_path")
+                );
+                users.add(user);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,5 +92,4 @@ public class UserDAO {
         }
         return users;
     }
-
 }
