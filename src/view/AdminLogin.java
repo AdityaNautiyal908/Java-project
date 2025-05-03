@@ -4,7 +4,12 @@ package view;
 import dao.AdminDAO;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
 
 public class AdminLogin extends JFrame {
     private JTextField usernameField;
@@ -13,78 +18,205 @@ public class AdminLogin extends JFrame {
     private AdminDAO adminDAO = new AdminDAO();
 
     public AdminLogin() {
-        setTitle("Admin Login");
-        setBounds(550, 250, 700, 400);
+        setTitle("Fitness Hub - Admin Login");
+        setSize(800, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(null);  // Using absolute positioning (null layout)
+        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setShape(new RoundRectangle2D.Double(0, 0, 800, 500, 20, 20));
 
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setLayout(null);  // Same layout for the panel
-        panel.setBounds(0, 0, 700, 400);
-        add(panel);
+        // Create main panel with gradient background
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                
+                // Create gradient background
+                GradientPaint gradient = new GradientPaint(
+                    0, 0, new Color(41, 128, 185), // Dark blue
+                    0, getHeight(), new Color(44, 62, 80) // Darker blue
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Admin Username label and text field
-        JLabel l1 = new JLabel("Admin Username:");
-        l1.setBounds(124, 89, 120, 24);
-        panel.add(l1);
+        // Create left panel for image
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false);
+        
+        ImageIcon icon = new ImageIcon("resources/login.png");
+        Image scaledImage = icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        leftPanel.add(imageLabel, BorderLayout.CENTER);
 
-        usernameField = new JTextField();
-        usernameField.setBounds(250, 93, 157, 20);
-        panel.add(usernameField);
+        // Create right panel for login form
+        JPanel rightPanel = new JPanel(new GridBagLayout());
+        rightPanel.setOpaque(false);
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Password label and password field
-        JLabel l2 = new JLabel("Password:");
-        l2.setBounds(124, 124, 120, 24);
-        panel.add(l2);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        passwordField = new JPasswordField();
-        passwordField.setBounds(250, 128, 157, 20);
-        panel.add(passwordField);
+        // Title label
+        JLabel titleLabel = new JLabel("ADMIN LOGIN");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        rightPanel.add(titleLabel, gbc);
+
+        // Username field
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setForeground(Color.WHITE);
+        usernameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        rightPanel.add(usernameLabel, gbc);
+
+        gbc.gridy = 2;
+        usernameField = createStyledTextField();
+        rightPanel.add(usernameField, gbc);
+
+        // Password field
+        gbc.gridy = 3;
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setForeground(Color.WHITE);
+        passwordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        rightPanel.add(passwordLabel, gbc);
+
+        gbc.gridy = 4;
+        passwordField = createStyledPasswordField();
+        rightPanel.add(passwordField, gbc);
 
         // Login button
-        loginButton = new JButton("Login");
-        loginButton.setForeground(new Color(46, 139, 87));
-        loginButton.setBackground(new Color(176, 224, 230));
-        loginButton.setBounds(199, 181, 113, 25);
-        panel.add(loginButton);
-
+        gbc.gridy = 5;
+        loginButton = createStyledButton("Login", new Color(46, 204, 113));
         loginButton.addActionListener(e -> login());
+        rightPanel.add(loginButton, gbc);
 
-        // Admin access only label
-        JLabel l5 = new JLabel("Admin Access Only");
-        l5.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        l5.setForeground(new Color(255, 0, 0));
-        l5.setBounds(160, 230, 150, 20);
-        panel.add(l5);
-
-        // Optional: Admin icon
-        ImageIcon c1 = new ImageIcon("resources/login.png");
-        Image i1 = c1.getImage().getScaledInstance(150, 150, Image.SCALE_DEFAULT);
-        ImageIcon i2 = new ImageIcon(i1);
-        JLabel icon = new JLabel(i2);
-        icon.setBounds(480, 70, 150, 150);
-        panel.add(icon);
-
-        // Forgot Password Button
-        forgotPasswordButton = new JButton("Forgot Password?");
-        forgotPasswordButton.setForeground(Color.BLUE);
-        forgotPasswordButton.setBackground(new Color(230, 230, 250));
-        forgotPasswordButton.setBounds(160, 270, 150, 25);
-        forgotPasswordButton.setFocusPainted(false);  // Remove focus highlight
-        panel.add(forgotPasswordButton);
-
-        // Action listener for forgot password button
+        // Forgot password button
+        gbc.gridy = 6;
+        forgotPasswordButton = createStyledButton("Forgot Password?", new Color(52, 152, 219));
         forgotPasswordButton.addActionListener(e -> new ForgotPassword(this));
+        rightPanel.add(forgotPasswordButton, gbc);
 
-        // Make sure all components are visible, then call revalidate() and repaint() on the frame itself
-        panel.revalidate();
-        panel.repaint();
-        this.revalidate();
-        this.repaint();
+        // Add panels to main panel
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+        mainPanel.add(rightPanel, BorderLayout.CENTER);
 
-        // Set frame visibility
+        // Add close button
+        JButton closeButton = createStyledButton("×", new Color(231, 76, 60));
+        closeButton.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        closeButton.setPreferredSize(new Dimension(40, 40));
+        closeButton.addActionListener(e -> dispose());
+        
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setOpaque(false);
+        topPanel.add(closeButton);
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+
+        add(mainPanel);
         setVisible(true);
+
+        // Add keyboard navigation
+        usernameField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    passwordField.requestFocus();
+                }
+            }
+        });
+
+        passwordField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    login();
+                }
+            }
+        });
+
+        // Request focus on username field
+        usernameField.requestFocus();
+    }
+
+    private JTextField createStyledTextField() {
+        JTextField textField = new JTextField(20);
+        textField.setBackground(new Color(255, 255, 255, 200));
+        textField.setForeground(Color.BLACK);
+        textField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        textField.setBorder(new CompoundBorder(
+            new LineBorder(new Color(255, 255, 255, 100), 1, true),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textField.selectAll();
+                textField.setBackground(new Color(255, 255, 255, 255));
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                textField.setBackground(new Color(255, 255, 255, 200));
+            }
+        });
+        return textField;
+    }
+
+    private JPasswordField createStyledPasswordField() {
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setBackground(new Color(255, 255, 255, 200));
+        passwordField.setForeground(Color.BLACK);
+        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        passwordField.setBorder(new CompoundBorder(
+            new LineBorder(new Color(255, 255, 255, 100), 1, true),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+        passwordField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.selectAll();
+                passwordField.setBackground(new Color(255, 255, 255, 255));
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                passwordField.setBackground(new Color(255, 255, 255, 200));
+            }
+        });
+        return passwordField;
+    }
+
+    private JButton createStyledButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(color.darker());
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(color);
+            }
+        });
+        
+        return button;
     }
 
     private void login() {
@@ -92,11 +224,18 @@ public class AdminLogin extends JFrame {
         String password = new String(passwordField.getPassword());
 
         if (adminDAO.isValidAdmin(username, password)) {
-            // Pass `this` to Loading so it can close this window later
-            Loading loading = new Loading(username, this);
-            loading.setUploading();  // Start loading animation
+            // Create loading screen with completion callback
+            Loading loading = new Loading(username, this, () -> {
+                new AdminPanel(username);
+            });
+            loading.setUploading();
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid credentials ❌");
+            JOptionPane.showMessageDialog(this, 
+                "Invalid credentials ❌",
+                "Login Failed",
+                JOptionPane.ERROR_MESSAGE
+            );
+            usernameField.requestFocus();
         }
     }
 

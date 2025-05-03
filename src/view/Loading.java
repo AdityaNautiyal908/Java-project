@@ -9,10 +9,12 @@ public class Loading extends JFrame implements Runnable {
     private Thread th;
     private String username;
     private AdminLogin loginFrame;
+    private Runnable onComplete;
 
-    public Loading(String username, AdminLogin loginFrame) {
+    public Loading(String username, AdminLogin loginFrame, Runnable onComplete) {
         this.username = username;
         this.loginFrame = loginFrame;
+        this.onComplete = onComplete;
 
         setBounds(600, 300, 600, 400);
         JPanel contentPane = new JPanel();
@@ -44,9 +46,8 @@ public class Loading extends JFrame implements Runnable {
         setVisible(true);
         th = new Thread(this);
         th.start();
-        // Don't open AdminPanel here, we'll handle it in the run method after progress is complete.
         if (loginFrame != null) {
-            loginFrame.dispose();  // Close AdminLogin window after setting up loading
+            loginFrame.dispose();
         }
     }
 
@@ -55,11 +56,12 @@ public class Loading extends JFrame implements Runnable {
         try {
             for (int i = 0; i < 100; i++) {
                 progressBar.setValue(i + 1);
-                Thread.sleep(50); // Simulate loading process
+                Thread.sleep(50);
             }
-            setVisible(false); // Hide loading screen after progress is complete
-            // Open AdminPanel after loading completes
-            SwingUtilities.invokeLater(() -> new AdminPanel(username).setVisible(true));
+            setVisible(false);
+            if (onComplete != null) {
+                SwingUtilities.invokeLater(onComplete);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -67,7 +69,7 @@ public class Loading extends JFrame implements Runnable {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Loading loading = new Loading("admin", null);  // Dummy username, no login frame
+            Loading loading = new Loading("admin", null, null);
             loading.setUploading();
         });
     }
