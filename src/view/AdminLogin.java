@@ -2,11 +2,12 @@
 package view;
 
 import dao.AdminDAO;
-
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
@@ -16,6 +17,9 @@ public class AdminLogin extends JFrame {
     private JPasswordField passwordField;
     private JButton loginButton, forgotPasswordButton;
     private AdminDAO adminDAO = new AdminDAO();
+    private JLabel capsLockLabel;
+    private boolean passwordVisible = false;
+    private JButton togglePasswordButton;
 
     public AdminLogin() {
         setTitle("Fitness Hub - Admin Login");
@@ -93,17 +97,95 @@ public class AdminLogin extends JFrame {
         rightPanel.add(passwordLabel, gbc);
 
         gbc.gridy = 4;
-        passwordField = createStyledPasswordField();
-        rightPanel.add(passwordField, gbc);
+        passwordField = new JPasswordField(20);
+        passwordField.setBackground(new Color(255, 255, 255, 200));
+        passwordField.setForeground(Color.BLACK);
+        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        passwordField.setBorder(new CompoundBorder(
+            new LineBorder(new Color(255, 255, 255, 100), 1, true),
+            new EmptyBorder(5, 10, 5, 10) // Increased right padding for eye icon
+        ));
+        
+        // Create toggle password button
+        togglePasswordButton = new JButton();
+        togglePasswordButton.setFocusable(false);
+        togglePasswordButton.setContentAreaFilled(false);
+        togglePasswordButton.setBorderPainted(false);
+        togglePasswordButton.setPreferredSize(new Dimension(30, 30));
+        togglePasswordButton.setIcon(new ImageIcon(new ImageIcon("resources/eye.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        togglePasswordButton.setVisible(false); // Initially hidden
+        togglePasswordButton.addActionListener(e -> {
+            passwordVisible = !passwordVisible;
+            passwordField.setEchoChar(passwordVisible ? (char)0 : '\u2022');
+            togglePasswordButton.setIcon(new ImageIcon(new ImageIcon(passwordVisible ? "resources/eye-off.png" : "resources/eye.png").getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        });
+        
+        // Add document listener to show/hide toggle button based on content
+        passwordField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateToggleVisibility();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateToggleVisibility();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateToggleVisibility();
+            }
+
+            private void updateToggleVisibility() {
+                togglePasswordButton.setVisible(passwordField.getPassword().length > 0);
+            }
+        });
+
+        passwordField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.selectAll();
+                passwordField.setBackground(new Color(255, 255, 255, 255));
+                togglePasswordButton.setVisible(passwordField.getPassword().length > 0);
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                passwordField.setBackground(new Color(255, 255, 255, 200));
+                togglePasswordButton.setVisible(false);
+            }
+        });
+
+        // Create panel to hold both password field and toggle button
+        JPanel passwordPanel = new JPanel(new BorderLayout());
+        passwordPanel.setOpaque(false);
+        passwordPanel.setPreferredSize(usernameField.getPreferredSize());
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
+        
+        // Add the toggle button to the EAST with some padding
+        JPanel toggleButtonPanel = new JPanel(new BorderLayout());
+        toggleButtonPanel.setOpaque(false);
+        toggleButtonPanel.setBorder(new EmptyBorder(0, 5, 0, -5)); 
+        toggleButtonPanel.add(togglePasswordButton, BorderLayout.CENTER);
+        passwordPanel.add(toggleButtonPanel, BorderLayout.EAST);
+        
+        rightPanel.add(passwordPanel, gbc);
+
+        // Caps Lock warning label
+        gbc.gridy = 5;
+        capsLockLabel = new JLabel("");
+        capsLockLabel.setForeground(Color.YELLOW);
+        capsLockLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        rightPanel.add(capsLockLabel, gbc);
 
         // Login button
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         loginButton = createStyledButton("Login", new Color(46, 204, 113));
-        loginButton.addActionListener(e -> login());
+        loginButton.addActionListener(e -> loginWithAnimation());
         rightPanel.add(loginButton, gbc);
 
         // Forgot password button
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         forgotPasswordButton = createStyledButton("Forgot Password?", new Color(52, 152, 219));
         forgotPasswordButton.addActionListener(e -> {
             ForgotPassword forgotPassword = new ForgotPassword(this);
@@ -112,7 +194,7 @@ public class AdminLogin extends JFrame {
         rightPanel.add(forgotPasswordButton, gbc);
 
         // Register button
-        gbc.gridy = 7;
+        gbc.gridy = 8;
         JButton registerButton = createStyledButton("Register New Admin", new Color(155, 89, 182));
         registerButton.addActionListener(e -> {
             AdminRegistration registration = new AdminRegistration();
@@ -152,8 +234,13 @@ public class AdminLogin extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    login();
+                    loginWithAnimation();
                 }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                boolean isCapsLock = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+                capsLockLabel.setText(isCapsLock ? "Caps Lock is ON" : "");
             }
         });
 
@@ -182,29 +269,6 @@ public class AdminLogin extends JFrame {
             }
         });
         return textField;
-    }
-
-    private JPasswordField createStyledPasswordField() {
-        JPasswordField passwordField = new JPasswordField(20);
-        passwordField.setBackground(new Color(255, 255, 255, 200));
-        passwordField.setForeground(Color.BLACK);
-        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        passwordField.setBorder(new CompoundBorder(
-            new LineBorder(new Color(255, 255, 255, 100), 1, true),
-            new EmptyBorder(5, 10, 5, 10)
-        ));
-        passwordField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                passwordField.selectAll();
-                passwordField.setBackground(new Color(255, 255, 255, 255));
-            }
-            @Override
-            public void focusLost(FocusEvent e) {
-                passwordField.setBackground(new Color(255, 255, 255, 200));
-            }
-        });
-        return passwordField;
     }
 
     private JButton createStyledButton(String text, Color color) {
@@ -260,6 +324,19 @@ public class AdminLogin extends JFrame {
             );
             usernameField.requestFocus();
         }
+    }
+
+    // Animated login feedback
+    private void loginWithAnimation() {
+        loginButton.setEnabled(false);
+        loginButton.setText("Logging in...");
+        Timer timer = new Timer(1200, e -> {
+            loginButton.setEnabled(true);
+            loginButton.setText("Login");
+            login();
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     public static void main(String[] args) {
