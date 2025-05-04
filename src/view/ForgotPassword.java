@@ -35,7 +35,7 @@ public class ForgotPassword extends JDialog {
         setUndecorated(true);
         setShape(new RoundRectangle2D.Double(0, 0, 800, 600, 20, 20));
 
-        // Create main panel with gradient background
+        // Main panel with gradient background
         JPanel mainPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -52,110 +52,126 @@ public class ForgotPassword extends JDialog {
         };
         mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
 
-        // Create content panel with BoxLayout for vertical alignment
-        JPanel contentPanel = new JPanel();
-        contentPanel.setOpaque(false);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // --- Left image panel ---
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false);
+        leftPanel.setPreferredSize(new Dimension(320, 400));
+
+        // Dummy image path, replace with your actual image path
+        ImageIcon icon = new ImageIcon("resources/reset_password.png");
+        Image scaledImage = icon.getImage().getScaledInstance(220, 220, Image.SCALE_SMOOTH);
+        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+        leftPanel.add(imageLabel, BorderLayout.CENTER);
+
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+
+        // --- Right form panel ---
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 0, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.EAST; // Right-align
 
         // Title label
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         JLabel titleLabel = new JLabel("RESET PASSWORD");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
-        contentPanel.add(titleLabel);
+        titleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(titleLabel, gbc);
 
         // Username label and field
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
         JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setForeground(Color.WHITE);
         usernameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(usernameLabel);
-        contentPanel.add(Box.createVerticalStrut(5));
+        usernameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(usernameLabel, gbc);
         usernameField = createStyledTextField();
         usernameField.setMaximumSize(new Dimension(400, 50));
         usernameField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(usernameField);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(usernameField, gbc);
+        gbc.gridy++;
 
         // Recovery Method label and field
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
         JLabel recoveryMethodLabel = new JLabel("Recovery Method:");
         recoveryMethodLabel.setForeground(Color.WHITE);
         recoveryMethodLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        recoveryMethodLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(recoveryMethodLabel);
-        contentPanel.add(Box.createVerticalStrut(5));
+        recoveryMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(recoveryMethodLabel, gbc);
+        gbc.gridy++;
         recoveryMethodCombo = new JComboBox<>(recoveryMethods);
         recoveryMethodCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         recoveryMethodCombo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(recoveryMethodCombo);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(recoveryMethodCombo, gbc);
+        gbc.gridy++;
 
         // Recovery Answer label and field
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
         JLabel recoveryAnswerLabel = new JLabel("Answer:");
         recoveryAnswerLabel.setForeground(Color.WHITE);
         recoveryAnswerLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        recoveryAnswerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(recoveryAnswerLabel);
-        contentPanel.add(Box.createVerticalStrut(5));
+        recoveryAnswerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(recoveryAnswerLabel, gbc);
+        gbc.gridy++;
         recoveryAnswerField = createStyledTextField();
         recoveryAnswerField.setMaximumSize(new Dimension(400, 50));
         recoveryAnswerField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(recoveryAnswerField);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(recoveryAnswerField, gbc);
+        gbc.gridy++;
 
         // New Password label and field
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
         JLabel newPasswordLabel = new JLabel("New Password:");
         newPasswordLabel.setForeground(Color.WHITE);
         newPasswordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        newPasswordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(newPasswordLabel);
-        contentPanel.add(Box.createVerticalStrut(5));
+        newPasswordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(newPasswordLabel, gbc);
+        gbc.gridy++;
         newPasswordField = createStyledPasswordField();
         newPasswordField.setMaximumSize(new Dimension(400, 50));
         newPasswordField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(newPasswordField);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(newPasswordField, gbc);
+        gbc.gridy++;
 
         // Confirm Password label and field
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
         JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         confirmPasswordLabel.setForeground(Color.WHITE);
         confirmPasswordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        confirmPasswordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(confirmPasswordLabel);
-        contentPanel.add(Box.createVerticalStrut(5));
+        confirmPasswordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        formPanel.add(confirmPasswordLabel, gbc);
+        gbc.gridy++;
         confirmPasswordField = createStyledPasswordField();
         confirmPasswordField.setMaximumSize(new Dimension(400, 50));
         confirmPasswordField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(confirmPasswordField);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(confirmPasswordField, gbc);
+        gbc.gridy++;
 
-        // Reset button
+        // Add the reset button at the bottom, right-aligned
+        gbc.gridx = 1; gbc.gridy++; gbc.gridwidth = 1;
         resetButton = createStyledButton("Reset Password", new Color(46, 204, 113));
-        resetButton.setPreferredSize(new Dimension(300, 50));
-        resetButton.setMaximumSize(new Dimension(300, 50));
-        resetButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         resetButton.addActionListener(e -> handleReset());
-        contentPanel.add(resetButton);
-        contentPanel.add(Box.createVerticalStrut(10));
+        formPanel.add(resetButton, gbc);
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
 
         // Add close button
-        closeButton = createStyledButton("×", new Color(231, 76, 60));
-        closeButton.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        closeButton.setPreferredSize(new Dimension(60, 60));
-        closeButton.addActionListener(e -> dispose());
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topPanel.setOpaque(false);
+        closeButton = createStyledButton("×", new Color(231, 76, 60));
+        closeButton.setFont(new Font("Arial", Font.BOLD, 28));
+        closeButton.setPreferredSize(new Dimension(60, 60));
+        closeButton.addActionListener(e -> dispose());
         topPanel.add(closeButton);
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // Center the content panel
-        JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setOpaque(false);
-        centerPanel.add(contentPanel, new GridBagConstraints());
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-        add(mainPanel);
+        setContentPane(mainPanel);
+        getRootPane().setDefaultButton(resetButton);
 
         // Add keyboard navigation
         usernameField.addKeyListener(new KeyAdapter() {
