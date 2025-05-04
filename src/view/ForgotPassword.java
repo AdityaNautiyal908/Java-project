@@ -160,14 +160,27 @@ public class ForgotPassword extends JDialog {
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // Add close button
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Add close button and title at the top
+        JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
+
+        // Title label
+        JLabel topTitle = new JLabel("Forgot Password");
+        topTitle.setFont(new Font("Segoe UI", Font.BOLD, 40));
+        topTitle.setForeground(Color.WHITE);
+        topTitle.setBorder(BorderFactory.createEmptyBorder(20, 200, 10, 0));
+        topPanel.add(topTitle, BorderLayout.WEST);
+
+        // Close button
         closeButton = createStyledButton("×", new Color(231, 76, 60));
         closeButton.setFont(new Font("Arial", Font.BOLD, 28));
         closeButton.setPreferredSize(new Dimension(60, 60));
         closeButton.addActionListener(e -> dispose());
-        topPanel.add(closeButton);
+        JPanel closePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        closePanel.setOpaque(false);
+        closePanel.add(closeButton);
+        topPanel.add(closePanel, BorderLayout.EAST);
+
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         setContentPane(mainPanel);
